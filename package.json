@@ -9,7 +9,8 @@
     "lint": "eslint",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "verify:ai-contract": "node --experimental-strip-types scripts/verify-ai-contract.mts"
+    "verify:ai-contract": "node --experimental-strip-types scripts/verify-ai-contract.mts",
+    "verify:reasoning-engine": "node --experimental-strip-types scripts/verify-reasoning-engine.mts"
   },
   "dependencies": {
     "next": "16.2.10",
