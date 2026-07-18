@@ -17,8 +17,9 @@ unvalidated model prose for application state.
 2. The request builder constructs and validates a versioned
    `ForgeAnalysisRequest`.
 3. The reasoning orchestrator selects an injected analysis provider.
-4. Mock mode returns deterministic contract fixtures today. Future GPT mode
-   will send the request and system specification to GPT-5.6.
+4. Mock mode returns deterministic contract fixtures. GPT mode sends the
+   request and system specification to the configured GPT-5.6 Responses API
+   model and requests Zod-backed structured output.
 5. Every provider returns `unknown`; no provider response is trusted.
 6. The orchestrator validates the complete response with Zod before returning.
 7. A valid `ForgeWorkspaceAnalysis` maps deterministically into the six
@@ -48,8 +49,8 @@ state.
 ## Provider Boundary and Orchestrator
 
 Analysis providers implement one framework-independent asynchronous interface.
-The mock and future GPT implementations share this boundary, but neither can
-return a trusted workspace type directly. The orchestrator owns request
+The mock and GPT implementations share this boundary, but neither can return a
+trusted workspace type directly. The orchestrator owns request
 building, provider selection, response validation, typed error mapping, and the
 bounded retry policy.
 
@@ -62,9 +63,11 @@ deterministic and avoids global mutable clients.
 the canonical proptech fixture only for matching Project DNA and creates a
 neutral contract-valid adaptation for other projects.
 
-`gpt` mode is an explicit placeholder that currently returns
-`PROVIDER_NOT_CONFIGURED`. A later milestone will connect GPT-5.6 at that
-provider boundary without changing the orchestrator or AI contract.
+`gpt` mode uses the official OpenAI SDK and Responses API. It requires explicit
+`OPENAI_API_KEY` and `OPENAI_MODEL` server environment values and fails with
+`PROVIDER_NOT_CONFIGURED` before network access when either is absent. The SDK
+uses the shared Zod contract for structured parsing; the orchestrator still
+performs authoritative validation.
 
 ## Retry Principles
 
@@ -76,17 +79,20 @@ timing is injectable so direct verification does not wait.
 ## Server Responsibility
 
 The reasoning engine lives under `src/lib/ai` and is server-side application
-code. Client components must not import it. It intentionally contains no React,
-Next.js route, browser, database, secret, or network concerns. A future API route
-will call the orchestrator as a thin server adapter.
+code. Client components must not import it. It contains no React, Next.js route,
+browser, database, or embedded secret concerns. Only the GPT provider owns
+network access. A future API route will call the orchestrator as a thin server
+adapter.
 
 Detailed architecture and error codes are documented in
 `docs/REASONING_ENGINE.md`.
 
 ## Current Milestone Boundary
 
-The reasoning pipeline and deterministic mock mode are implemented. This
-milestone does not call the OpenAI API, use an API key, persist data, add an API
-route, or populate the current workspace UI. The future API milestone will
-compose the existing orchestrator with the GPT provider rather than placing
-reasoning logic inside a route.
+The reasoning pipeline, deterministic mock mode, and opt-in GPT provider are
+implemented. Normal verification remains network-free, and no paid call is
+made without `RUN_REAL_GPT_TEST=true`. This milestone does not persist data,
+add an API route, or populate the current workspace UI. The future API
+milestone will compose the existing orchestrator with the GPT provider rather
+than placing reasoning logic inside a route. Operational details are in
+`docs/GPT_PROVIDER.md`.

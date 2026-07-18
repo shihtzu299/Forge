@@ -10,10 +10,12 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "verify:ai-contract": "node --experimental-strip-types scripts/verify-ai-contract.mts",
-    "verify:reasoning-engine": "node --experimental-strip-types scripts/verify-reasoning-engine.mts"
+    "verify:reasoning-engine": "node --experimental-strip-types scripts/verify-reasoning-engine.mts",
+    "verify:gpt-provider": "node --experimental-strip-types scripts/verify-gpt-provider.mts"
   },
   "dependencies": {
     "next": "16.2.10",
+    "openai": "6.48.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "4.4.3"

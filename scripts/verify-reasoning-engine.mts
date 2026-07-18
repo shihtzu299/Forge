@@ -28,7 +28,7 @@ function createOrchestrator(mockProvider: AnalysisProvider) {
   return new ForgeAnalysisOrchestrator({
     providers: {
       mock: mockProvider,
-      gpt: new GptAnalysisProvider(),
+      gpt: new GptAnalysisProvider({ environment: {} }),
     },
     retryDelayMilliseconds: 0,
     delay: noDelay,
@@ -136,6 +136,30 @@ await assertErrorCode(
   "unconfigured GPT provider",
   "PROVIDER_NOT_CONFIGURED",
   () => mockOrchestrator.analyze({ ...proptechInput, mode: "gpt" }),
+);
+
+const missingModelProvider = new GptAnalysisProvider({
+  environment: { OPENAI_API_KEY: "test-key", OPENAI_MODEL: undefined },
+});
+await assertErrorCode(
+  "GPT provider without model",
+  "PROVIDER_NOT_CONFIGURED",
+  () =>
+    new ForgeAnalysisOrchestrator({
+      providers: { gpt: missingModelProvider },
+    }).analyze({ ...proptechInput, mode: "gpt" }),
+);
+
+const missingKeyProvider = new GptAnalysisProvider({
+  environment: { OPENAI_API_KEY: undefined, OPENAI_MODEL: "test-model" },
+});
+await assertErrorCode(
+  "GPT provider without API key",
+  "PROVIDER_NOT_CONFIGURED",
+  () =>
+    new ForgeAnalysisOrchestrator({
+      providers: { gpt: missingKeyProvider },
+    }).analyze({ ...proptechInput, mode: "gpt" }),
 );
 
 let malformedCalls = 0;
