@@ -91,8 +91,8 @@ Detailed architecture and error codes are documented in
 
 The reasoning pipeline, deterministic mock mode, and opt-in GPT provider are
 implemented. Normal verification remains network-free, and no paid call is
-made without `RUN_REAL_GPT_TEST=true`. This milestone does not persist data,
-add an API route, or populate the current workspace UI. The future API
-milestone will compose the existing orchestrator with the GPT provider rather
-than placing reasoning logic inside a route. Operational details are in
-`docs/GPT_PROVIDER.md`.
+made without `RUN_REAL_GPT_TEST=true`. The workspace Route Handler composes the
+existing orchestrator with persistence rather than placing reasoning logic
+inside the route. Validated analysis may be stored only after the orchestrator
+succeeds. Operational details are in `docs/GPT_PROVIDER.md` and
+`docs/PROJECT_PERSISTENCE.md`.

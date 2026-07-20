@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  name         String
+  idea         String
+  projectDNA   Json?
+  analysis     Json?
+  analysisMode String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([updatedAt])
+}

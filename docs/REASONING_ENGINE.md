@@ -4,12 +4,12 @@
 
 The Forge Reasoning Engine is the framework-independent server-side pipeline
 between completed Project DNA and a validated Forge workspace analysis. It can
-run with deterministic mock data today and accept a real GPT-5.6 provider later
-without changing the contract, UI, or orchestration rules.
+run with deterministic mock data or the configured GPT-5.6 provider without
+changing the contract, UI, or orchestration rules.
 
-The engine must run on the server. Client components must never import modules
-from `src/lib/ai`. The current implementation intentionally avoids browser,
-React, Next.js, API route, database, environment-variable, and network APIs.
+The engine must run on the server. Client components may import erased types
+from `src/lib/ai`, but never runtime provider or orchestrator modules. The
+engine remains framework-independent; the Route Handler is a thin adapter.
 
 ## Architecture
 
@@ -20,7 +20,7 @@ React, Next.js, API route, database, environment-variable, and network APIs.
 | `request-builder.ts`                  | Versioned request construction and validation       |
 | `providers/analysis-provider.ts`      | Untrusted provider boundary                         |
 | `providers/mock-analysis-provider.ts` | Deterministic canonical or adapted analysis         |
-| `providers/gpt-analysis-provider.ts`  | Explicit unconfigured future integration point      |
+| `providers/gpt-analysis-provider.ts`  | OpenAI Responses API structured-output adapter      |
 | `analysis-orchestrator.ts`            | Selection, retry, response validation, and results  |
 
 The existing AI contract and system prompt remain the single sources of truth.
@@ -66,14 +66,11 @@ canonical source fixture.
 
 ### GPT
 
-GPT mode currently implements the same provider interface but always throws
-`PROVIDER_NOT_CONFIGURED`. It contains no SDK, API call, secret lookup, or fake
-response.
-
-The future integration will replace the placeholder body with a server-side
-GPT-5.6 call using `FORGE_SYSTEM_PROMPT`, serialize the validated request, and
-return the parsed model value as `unknown`. The orchestrator will continue to
-own validation and retries.
+GPT mode implements the same provider interface with the official OpenAI SDK,
+Responses API, `FORGE_SYSTEM_PROMPT`, and the shared Zod structured-output
+schema. It reads `OPENAI_API_KEY` and `OPENAI_MODEL` only on the server and
+returns `PROVIDER_NOT_CONFIGURED` before network access when either is absent.
+The orchestrator continues to own authoritative validation and retries.
 
 ## Provider Interface
 
@@ -141,7 +138,6 @@ responses never escape through `analyze` or `safeAnalyze`.
 ## Framework Independence
 
 The reasoning engine has no React component lifecycle, HTTP request/response
-type, route handler, browser API, or network dependency. This lets the direct
-Node verification script exercise the same production modules that a future
-API route will call. The API route will be a thin server adapter around the
-orchestrator rather than the owner of reasoning behavior.
+type, route handler, or browser API. Provider-specific network access remains
+behind its interface. `POST /api/workspace-analysis` is a thin server adapter
+around the orchestrator rather than the owner of reasoning behavior.

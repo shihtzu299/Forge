@@ -17,6 +17,7 @@ type ProjectCreationProps = {
   isCreating: boolean;
   isCommitting: boolean;
   isHidden: boolean;
+  externalError?: string;
   onCreate: (idea: string) => void;
 };
 
@@ -24,10 +25,12 @@ export function ProjectCreation({
   isCreating,
   isCommitting,
   isHidden,
+  externalError = "",
   onCreate,
 }: ProjectCreationProps) {
   const [idea, setIdea] = useState("");
   const [error, setError] = useState("");
+  const displayedError = error || externalError;
 
   function submitIdea(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,8 +102,10 @@ export function ProjectCreation({
               }}
               placeholder="Build Africa's leading proptech platform..."
               rows={6}
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? "project-idea-error" : undefined}
+              aria-invalid={Boolean(displayedError)}
+              aria-describedby={
+                displayedError ? "project-idea-error" : undefined
+              }
               readOnly={isCreating}
               className="w-full resize-none rounded-xl border border-border bg-surface-elevated p-5 text-base leading-7 text-text-primary shadow-md outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-text-muted hover:border-text-muted/60 focus:border-accent-primary sm:p-6 sm:text-lg"
             />
@@ -123,13 +128,13 @@ export function ProjectCreation({
             </div>
 
             <div className="mt-5 min-h-6 text-center">
-              {error ? (
+              {displayedError ? (
                 <p
                   id="project-idea-error"
                   role="alert"
                   className="text-sm text-destructive"
                 >
-                  {error}
+                  {displayedError}
                 </p>
               ) : null}
             </div>

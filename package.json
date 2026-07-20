@@ -2,33 +2,46 @@
   "name": "forge",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
     "lint": "eslint",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "verify:ai-contract": "node --experimental-strip-types scripts/verify-ai-contract.mts",
     "verify:reasoning-engine": "node --experimental-strip-types scripts/verify-reasoning-engine.mts",
-    "verify:gpt-provider": "node --experimental-strip-types scripts/verify-gpt-provider.mts"
+    "verify:gpt-provider": "node --experimental-strip-types scripts/verify-gpt-provider.mts",
+    "verify:workspace-generation": "node --experimental-strip-types scripts/verify-workspace-generation.mts",
+    "verify:project-persistence": "node --experimental-strip-types scripts/verify-project-persistence.mts"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "7.8.0",
+    "@prisma/client": "7.8.0",
+    "dotenv": "17.4.2",
     "next": "16.2.10",
     "openai": "6.48.0",
+    "pg": "8.22.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "server-only": "0.0.1",
     "zod": "4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.5",
+    "prisma": "7.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -47,19 +47,36 @@ const initialAnswers: Record<AnswerKey, string> = {
 
 export function ProjectDNABuilder({
   idea,
+  initialProjectDNA,
+  isGenerating,
+  allowEditing,
+  onGenerate,
   onProgressChange,
 }: {
   idea: string;
+  initialProjectDNA: ProjectDNA | null;
+  isGenerating: boolean;
+  allowEditing: boolean;
+  onGenerate: (projectDNA: ProjectDNA) => void;
   onProgressChange: (progress: ProjectDNAProgress) => void;
 }) {
-  const [answers, setAnswers] = useState(initialAnswers);
+  const [answers, setAnswers] = useState<Record<AnswerKey, string>>(() =>
+    initialProjectDNA
+      ? {
+          firstCustomer: initialProjectDNA.firstCustomer,
+          coreProblem: initialProjectDNA.coreProblem,
+          desiredOutcome: initialProjectDNA.desiredOutcome,
+          biggestConstraint: initialProjectDNA.biggestConstraint,
+        }
+      : initialAnswers,
+  );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [error, setError] = useState("");
-  const [completedDNA, setCompletedDNA] = useState<ProjectDNA | null>(null);
-  const [isReadyForAnalysis, setIsReadyForAnalysis] = useState(false);
+  const [completedDNA, setCompletedDNA] = useState<ProjectDNA | null>(
+    initialProjectDNA,
+  );
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const summaryHeadingRef = useRef<HTMLHeadingElement>(null);
-  const readyHeadingRef = useRef<HTMLHeadingElement>(null);
   const shouldFocusQuestionRef = useRef(false);
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -74,12 +91,6 @@ export function ProjectDNABuilder({
       shouldFocusQuestionRef.current = false;
     }
   }, [completedDNA, currentQuestionIndex]);
-
-  useEffect(() => {
-    if (isReadyForAnalysis) {
-      readyHeadingRef.current?.focus();
-    }
-  }, [isReadyForAnalysis]);
 
   function updateCurrentAnswer(value: string) {
     setAnswers((current) => ({
@@ -127,8 +138,16 @@ export function ProjectDNABuilder({
   }
 
   function generateWorkspace() {
-    setIsReadyForAnalysis(true);
     onProgressChange("ready");
+    if (completedDNA) onGenerate(completedDNA);
+  }
+
+  function editProjectDNA() {
+    setCompletedDNA(null);
+    setCurrentQuestionIndex(0);
+    setError("");
+    shouldFocusQuestionRef.current = true;
+    onProgressChange("in-progress");
   }
 
   if (completedDNA) {
@@ -174,28 +193,25 @@ export function ProjectDNABuilder({
           ))}
         </dl>
 
-        {isReadyForAnalysis ? (
-          <div
-            role="status"
-            className="mt-6 rounded-lg border border-accent-primary/40 bg-accent-primary/10 p-4"
-          >
-            <h3
-              ref={readyHeadingRef}
-              tabIndex={-1}
-              className="text-sm font-medium text-text-primary"
-            >
-              Project DNA ready for GPT-5.6 analysis.
-            </h3>
-          </div>
-        ) : (
+        <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
             onClick={generateWorkspace}
-            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-accent-primary/90"
+            disabled={isGenerating}
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-accent-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Generate Workspace
+            {isGenerating ? "Generating Workspace…" : "Generate Workspace"}
           </button>
-        )}
+          {allowEditing ? (
+            <button
+              type="button"
+              onClick={editProjectDNA}
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-surface-subtle px-5 py-2.5 text-sm font-medium text-text-secondary hover:text-text-primary"
+            >
+              Edit Project DNA
+            </button>
+          ) : null}
+        </div>
       </section>
     );
   }

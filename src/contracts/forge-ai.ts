@@ -39,7 +39,7 @@ const structuredId = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-\d+$/, {
   message: "IDs must use lowercase kebab-case with a numeric suffix",
 });
 
-const projectDNASchema: z.ZodType<ProjectDNA> = z.strictObject({
+export const projectDNASchema = z.strictObject({
   idea: requiredText,
   firstCustomer: requiredText,
   coreProblem: requiredText,
